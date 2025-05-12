@@ -533,20 +533,37 @@ $job_subtitle = $facility_name . 'の' . (!empty($job_position) ? $job_position[
                         <td><?php echo esc_html($facility_name); ?></td>
                     </tr>
                     <tr>
-                        <th>住所</th>
-                        <td><?php echo esc_html($facility_address); ?></td>
-                    </tr>
+    <th>住所</th>
+    <td>
+        <?php 
+        // 郵便番号と住所を分けて表示
+        $address = esc_html($facility_address);
+        // 郵便番号と住所部分を分割
+        $address_parts = preg_split('/(\〒\d{3}-\d{4})/', $address, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        
+        if (count($address_parts) >= 2) {
+            // 郵便番号と住所部分が分かれている場合
+            echo $address_parts[0] . "<br>"; // 郵便番号
+            echo $address_parts[1]; // 住所部分
+        } else {
+            // 分割できなかった場合はそのまま表示
+            echo $address;
+        }
+        ?>
+    </td>
+</tr>
                     <tr>
-                        <th>MAP</th>
-                        <td>
-                            <?php if (!empty($facility_map)) : ?>
-                            <div class="map-container">
-                                <?php echo $facility_map; // 地図埋め込みコード ?>
-                            </div>
-                            <?php endif; ?>
-                            <div><?php echo esc_html($facility_address); ?></div>
-                        </td>
-                    </tr>
+    <th>MAP</th>
+    <td>
+        <?php if (!empty($facility_map)) : ?>
+        <div class="map-container">
+            <?php echo $facility_map; // 地図埋め込みコード ?>
+        </div>
+        <?php endif; ?>
+        <!-- 以下の住所表示を削除 -->
+        <!-- <div><?php echo esc_html($facility_address); ?></div> -->
+    </td>
+</tr>
                     <tr>
                         <th>サービス種別</th>
                         <td><?php echo !empty($facility_type) ? esc_html(implode('・', $facility_type)) : ''; ?></td>

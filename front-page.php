@@ -156,7 +156,10 @@ if (!defined('ABSPATH')) exit; ?>
             $facility_company = get_post_meta(get_the_ID(), 'facility_company', true);
             $facility_address = get_post_meta(get_the_ID(), 'facility_address', true);
             $salary_range = get_post_meta(get_the_ID(), 'salary_range', true);
-            
+            // 郵便番号を除いた住所を表示するための処理を追加
+$facility_address = get_post_meta(get_the_ID(), 'facility_address', true);
+$facility_address = preg_replace('/〒\d{3}-\d{4}\s*/', '', $facility_address); // 郵便番号部分を削除
+
             // テキストの長さを制限
             $facility_name = limit_text_job($facility_name, 20);
             $facility_company = limit_text_job($facility_company, 20);

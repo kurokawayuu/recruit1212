@@ -193,7 +193,21 @@ if (isset($_POST['update_job']) && isset($_POST['job_nonce']) &&
             
             update_post_meta($job_id, 'staff_voice_items', $voice_items);
         }
-        
+        /// 給与情報の更新
+update_post_meta($job_id, 'salary_type', sanitize_text_field($_POST['salary_type']));
+update_post_meta($job_id, 'salary_form', sanitize_text_field($_POST['salary_form']));
+update_post_meta($job_id, 'salary_min', sanitize_text_field($_POST['salary_min']));
+update_post_meta($job_id, 'salary_max', sanitize_text_field($_POST['salary_max']));
+update_post_meta($job_id, 'fixed_salary', sanitize_text_field($_POST['fixed_salary']));
+update_post_meta($job_id, 'salary_remarks', wp_kses_post($_POST['salary_remarks']));
+
+// 旧形式との互換性のため、salary_rangeも更新
+if ($_POST['salary_form'] === 'fixed') {
+    $salary_range = sanitize_text_field($_POST['fixed_salary']);
+} else {
+    $salary_range = sanitize_text_field($_POST['salary_min']) . '〜' . sanitize_text_field($_POST['salary_max']);
+}
+update_post_meta($job_id, 'salary_range', $salary_range);
         // 成功メッセージ表示と求人詳細ページへのリンク
         $success = true;
     } else {
@@ -350,10 +364,59 @@ $thumbnail_id = get_post_thumbnail_id($job_id);
                 ?>
             </div>
             
-            <div class="form-row">
-    <label for="salary_range">給与範囲 <span class="required">*</span></label>
-    <textarea id="salary_range" name="salary_range" rows="3" required><?php echo esc_textarea($salary_range); ?></textarea>
-    <span class="form-hint">例: 月給180,000円〜250,000円</span>
+            <div class="form-section">
+    <h2 class="section-title">給与情報</h2>
+    
+    <div class="form-row">
+        <label for="salary_type">賃金形態 <span class="required">*</span></label>
+        <select id="salary_type" name="salary_type" required>
+            <option value="MONTH" <?php selected(get_post_meta($job_id, 'salary_type', true), 'MONTH'); ?>>月給</option>
+            <option value="HOUR" <?php selected(get_post_meta($job_id, 'salary_type', true), 'HOUR'); ?>>時給</option>
+        </select>
+    </div>
+    
+    <div class="form-row">
+        <label>給与形態 <span class="required">*</span></label>
+        <div class="radio-wrapper">
+            <label>
+                <input type="radio" name="salary_form" value="fixed" <?php checked(get_post_meta($job_id, 'salary_form', true), 'fixed'); ?> required> 
+                給与に幅がない（固定給）
+            </label>
+            <label>
+                <input type="radio" name="salary_form" value="range" <?php checked(get_post_meta($job_id, 'salary_form', true), 'range'); ?> required> 
+                給与に幅がある（範囲給）
+            </label>
+        </div>
+    </div>
+    
+    <div id="fixed-salary-field" class="form-row salary-field" style="display: none;">
+        <label for="fixed_salary">給与（固定給） <span class="required">*</span></label>
+        <input type="text" id="fixed_salary" name="fixed_salary" value="<?php echo esc_attr(get_post_meta($job_id, 'fixed_salary', true)); ?>">
+        <span class="form-hint">例: 250,000円</span>
+    </div>
+    
+    <div id="range-salary-fields" class="salary-field" style="display: none;">
+        <div class="form-row">
+            <label for="salary_min">給与①最低賃金 <span class="required">*</span></label>
+            <input type="text" id="salary_min" name="salary_min" value="<?php echo esc_attr(get_post_meta($job_id, 'salary_min', true)); ?>">
+            <span class="form-hint">例: 200,000円</span>
+        </div>
+        
+        <div class="form-row">
+            <label for="salary_max">給与②最高賃金 <span class="required">*</span></label>
+            <input type="text" id="salary_max" name="salary_max" value="<?php echo esc_attr(get_post_meta($job_id, 'salary_max', true)); ?>">
+            <span class="form-hint">例: 300,000円</span>
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <label for="salary_remarks">給料についての備考</label>
+        <textarea id="salary_remarks" name="salary_remarks" rows="3"><?php echo esc_textarea(get_post_meta($job_id, 'salary_remarks', true)); ?></textarea>
+        <span class="form-hint">例: 経験・能力により優遇。試用期間3ヶ月あり（同条件）。</span>
+    </div>
+    
+    <!-- 旧方式との互換性のため、salary_rangeも保持します -->
+    <input type="hidden" id="salary_range" name="salary_range" value="<?php echo esc_attr($salary_range); ?>">
 </div>
         
         <div class="form-section">
@@ -860,6 +923,34 @@ $thumbnail_id = get_post_thumbnail_id($job_id);
             custom_uploader.open();
         });
         
+// 給与フィールドの表示切替
+$('input[name="salary_form"]').on('change', function() {
+    // すべての給与フィールドを非表示
+    $('.salary-field').hide();
+    
+    // 選択された給与形態に応じたフィールドを表示
+    if ($(this).val() === 'fixed') {
+        $('#fixed-salary-field').show();
+        $('#fixed_salary').prop('required', true);
+        $('#salary_min, #salary_max').prop('required', false);
+    } else {
+        $('#range-salary-fields').show();
+        $('#fixed_salary').prop('required', false);
+        $('#salary_min, #salary_max').prop('required', true);
+    }
+});
+
+// ページ読み込み時の初期状態設定
+$(document).ready(function() {
+    // ラジオボタンの状態に合わせて初期表示を設定
+    $('input[name="salary_form"]:checked').trigger('change');
+    
+    // 初期状態で選択されていない場合は範囲給を選択
+    if (!$('input[name="salary_form"]:checked').length) {
+        $('input[name="salary_form"][value="range"]').prop('checked', true).trigger('change');
+    }
+});
+
         // 画像削除ボタン（サムネイル用）
         $(document).on('click', '#remove_thumbnail', function(e) {
             e.preventDefault();
