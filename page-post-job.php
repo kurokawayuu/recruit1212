@@ -242,10 +242,10 @@ if (isset($_POST['post_job']) && isset($_POST['job_nonce']) &&
             </div>
             
             <div class="form-row">
-                <label for="salary_range">給与範囲 <span class="required">*</span></label>
-                <input type="text" id="salary_range" name="salary_range" required>
-                <span class="form-hint">例: 月給180,000円〜250,000円</span>
-            </div>
+    <label for="salary_range">給与範囲 <span class="required">*</span></label>
+    <textarea id="salary_range" name="salary_range" rows="3" required></textarea>
+    <span class="form-hint">例: 月給180,000円〜250,000円</span>
+</div>
         </div>
         
         <div class="form-section">
@@ -325,16 +325,16 @@ if (isset($_POST['post_job']) && isset($_POST['job_nonce']) &&
             </div>
             
             <div class="form-row">
-                <label for="working_hours">勤務時間 <span class="required">*</span></label>
-                <input type="text" id="working_hours" name="working_hours" required>
-                <span class="form-hint">例: 9:00〜18:00（休憩60分）</span>
-            </div>
+    <label for="working_hours">勤務時間 <span class="required">*</span></label>
+    <textarea id="working_hours" name="working_hours" rows="3" required></textarea>
+    <span class="form-hint">例: 9:00〜18:00（休憩60分）</span>
+</div>
             
             <div class="form-row">
-                <label for="holidays">休日・休暇 <span class="required">*</span></label>
-                <input type="text" id="holidays" name="holidays" required>
-                <span class="form-hint">例: 土日祝、年末年始、有給休暇あり</span>
-            </div>
+    <label for="holidays">休日・休暇 <span class="required">*</span></label>
+    <textarea id="holidays" name="holidays" rows="3" required></textarea>
+    <span class="form-hint">例: 土日祝、年末年始、有給休暇あり</span>
+</div>
             
             <div class="form-row">
                 <label for="benefits">福利厚生 <span class="required">*</span></label>
@@ -523,9 +523,9 @@ if (isset($_POST['post_job']) && isset($_POST['job_nonce']) &&
             </div>
             
             <div class="form-row">
-                <label for="facility_hours">施設営業時間</label>
-                <input type="text" id="facility_hours" name="facility_hours">
-            </div>
+    <label for="facility_hours">施設営業時間</label>
+    <textarea id="facility_hours" name="facility_hours" rows="3"></textarea>
+</div>
             
             <div class="form-row">
                 <label for="facility_url">施設WebサイトURL</label>
